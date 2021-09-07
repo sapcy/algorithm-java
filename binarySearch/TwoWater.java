@@ -1,4 +1,4 @@
-package exhaustiveSearch;
+package binarySearch;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -6,47 +6,75 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.StringTokenizer;
 
-// https://www.acmicpc.net/problem/15649
+// https://www.acmicpc.net/problem/2470
 
-public class NandM2 {
+public class TwoWater {
     static StringBuilder sb = new StringBuilder();
     
-    static int N, M;
-    static int[] selected, used;
+    static int N, min;
+    static int[] numbers;
+    static int[] answers;
     
     public static void main(String[] args) {
         input();
-        rec_func(0);
+        sort();
         System.out.println(sb.toString());
     }
 
-    static void rec_func(int index) {
-        if (index == M) {
-            for (int i=0; i<M; i++) {
-                sb.append(selected[i]).append(' ');
-            }
-            sb.append('\n');
-        } else {
-            for (int i=1; i<=N; i++) {
-                if (used[i] != 1) {
-                    selected[index] = i;
-                    used[i] = 1;
-                    rec_func(index+1);
-                    selected[index] = 0;
-                    used[i] = 0;
+    static void sort() {
+        Arrays.sort(numbers);
+        
+        for (int i=0; i<N; i++) {
+            int result = binarySearch(numbers, i+1, N-1, -numbers[i]);
+            
+            if (i < result-1) {
+                if (Math.abs(numbers[result-1] + numbers[i]) < min) {
+                    min = Math.abs(numbers[result-1] + numbers[i]);
+                    answers[0] = numbers[i];
+                    answers[1] = numbers[result-1];
+                }
+            } 
+            
+            if (result < N) {
+                if (Math.abs(numbers[result] + numbers[i]) < min) {
+                    min = Math.abs(numbers[result] + numbers[i]);
+                    answers[0] = numbers[i];
+                    answers[1] = numbers[result];
                 }
             }
         }
+        
+        sb.append(answers[0]).append(" ").append(answers[1]);
+    }
+
+    static int binarySearch(int[] A, int L, int R, int value) {
+        int result = R+1;
+        
+        while (L <= R) {
+            int mid = (L + R)/2;
+
+            if (numbers[mid] >= value) {
+                result = mid;
+                R = mid-1;
+            } else if (numbers[mid] < value) {
+                L = mid+1;
+            }
+        }
+        return result;
     }
 
     static void input() {
         FastReader scan = new FastReader();
         N = scan.nextInt();
-        M = scan.nextInt();
-        selected = new int[M + 1];
-        used = new int[N + 1];
+        min = Integer.MAX_VALUE;
+        numbers = new int[N];
+        answers = new int[2];
+        for (int i=0; i<N; i++) {
+            numbers[i] = scan.nextInt();
+        }
     }
 
     static class FastReader {
@@ -94,17 +122,4 @@ public class NandM2 {
             return str;
         }
     }
-
-    // if (k == M + 1) {
-    //     for (int i=1; i<M; i++) sb.append(selected[i]).append(' ');
-    //     sb.append('\n');
-    // } else {
-    //     for (int i=1; i<=N; i++) {
-    //         selected[k] = i;
-    //         rec_func(k+1);
-    //         selected[k] = 0;
-    //     }
-    // }
-    
-    
 }

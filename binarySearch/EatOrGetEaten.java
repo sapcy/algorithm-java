@@ -1,4 +1,4 @@
-package exhaustiveSearch;
+package binarySearch;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -6,47 +6,82 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.StringTokenizer;
 
-// https://www.acmicpc.net/problem/15649
+// https://www.acmicpc.net/problem/7795
 
-public class NandM2 {
+public class EatOrGetEaten {
     static StringBuilder sb = new StringBuilder();
     
-    static int N, M;
-    static int[] selected, used;
+    static int N, A, B;
+    static int[][][] numbers;
+    static int[] answers;
     
     public static void main(String[] args) {
         input();
-        rec_func(0);
+        sort();
         System.out.println(sb.toString());
     }
 
-    static void rec_func(int index) {
-        if (index == M) {
-            for (int i=0; i<M; i++) {
-                sb.append(selected[i]).append(' ');
-            }
-            sb.append('\n');
-        } else {
-            for (int i=1; i<=N; i++) {
-                if (used[i] != 1) {
-                    selected[index] = i;
-                    used[i] = 1;
-                    rec_func(index+1);
-                    selected[index] = 0;
-                    used[i] = 0;
-                }
+    static void sort() {
+        for (int i=0; i<N; i++) {
+            Arrays.sort(numbers[i][1]);
+        }
+        
+        for (int index=0; index<N; index++) {
+            for (int i=0; i<numbers[index][0].length; i++) {
+                answers[index] += binarySearch(numbers[index][1], numbers[index][0][i]);
             }
         }
+
+        for (int i=0; i<N; i++) {
+            sb.append(answers[i]).append('\n');
+        }
+    }
+
+    static int binarySearch(int[] arr, int value) {
+        int result = 0;
+        int left = 0;
+        int right = arr.length-1;
+
+        if (arr[left] >= value) {
+            return left;
+        }
+        else if (arr[right] < value) {
+            return arr.length;
+        }
+
+        while (left <= right) {
+            int mid = (left + right)/2;
+
+            if (arr[mid] < value) {
+                result = mid+1;
+                left = mid+1;
+            } else if (arr[mid] >= value) {
+                right = mid-1;
+            }
+        }
+        return result;
     }
 
     static void input() {
         FastReader scan = new FastReader();
         N = scan.nextInt();
-        M = scan.nextInt();
-        selected = new int[M + 1];
-        used = new int[N + 1];
+        answers = new int[N];
+        numbers = new int[N][2][];
+        for (int i=0; i<N; i++) { 
+            A = scan.nextInt();
+            B = scan.nextInt();
+            numbers[i][0] = new int[A];
+            numbers[i][1] = new int[B];
+            for (int j=0; j<A; j++) {
+                numbers[i][0][j] = scan.nextInt();
+            }
+            for (int j=0; j<B; j++) {
+                numbers[i][1][j] = scan.nextInt();
+            }
+        }
     }
 
     static class FastReader {
@@ -94,17 +129,4 @@ public class NandM2 {
             return str;
         }
     }
-
-    // if (k == M + 1) {
-    //     for (int i=1; i<M; i++) sb.append(selected[i]).append(' ');
-    //     sb.append('\n');
-    // } else {
-    //     for (int i=1; i<=N; i++) {
-    //         selected[k] = i;
-    //         rec_func(k+1);
-    //         selected[k] = 0;
-    //     }
-    // }
-    
-    
 }
