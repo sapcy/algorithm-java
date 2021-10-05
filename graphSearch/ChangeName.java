@@ -1,10 +1,9 @@
 package graphSearch;
 
 import java.io.*;
-import java.lang.reflect.Array;
 import java.util.*;
 
-import jdk.javadoc.internal.doclets.formats.html.resources.standard;
+// https://www.acmicpc.net/problem/7562
 
 public class ChangeName {
     static FastReader scan = new FastReader();
@@ -12,7 +11,7 @@ public class ChangeName {
 
     static int L;
     static Pos start, end;
-    static int min, ans;
+    static int ans;
     static int[][] a;
     static int[][] dir = {{2, 1}, {1, 2}, {-1, -2}, {-2, -1}, {2, -1}, {-2, 1}, {-1, 2}, {1, -2}};
     static boolean[][] visited;
@@ -26,7 +25,6 @@ public class ChangeName {
     }
 
     static void bfs() {
-        /* TODO */
         Queue<Pos> queue = new LinkedList<>();
         queue.add(start);
         visited[start.x][start.y] = true;
@@ -39,19 +37,25 @@ public class ChangeName {
 
                 if (nx < 0 || ny < 0 || nx >= L || ny >= L) continue;
                 if (visited[nx][ny]) continue;
+                if (nx == end.x && ny == end.y) {
+                    ans = Math.min(ans, curPos.dist+1);
+                } else {
+                    queue.add(new Pos(nx, ny, curPos.dist+1));
+                    visited[nx][ny] = true;
+                }
             }
         }
     }
 
-    static int distance(int x, int y, int destX, int destY) {
-        return (int) Math.sqrt(Math.pow(Math.abs(destX - x), 2) + Math.pow(Math.abs(destY - y), 2));
-    }
-
     static void pro() {
-        ans = 0;
-        bfs(curX, curY);
+        ans = Integer.MAX_VALUE;
+        bfs();
 
-        System.out.println(ans);
+        if (ans == Integer.MAX_VALUE) {
+            System.out.println(0);
+        } else {
+            System.out.println(ans);
+        }
     }
     
     static class Pos {
