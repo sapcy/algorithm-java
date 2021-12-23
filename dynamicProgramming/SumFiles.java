@@ -2,7 +2,7 @@ package dynamicProgramming;
 
 import java.io.*;
 import java.util.*;
-
+  
 // https://www.acmicpc.net/problem/11066
 
 public class SumFiles {
