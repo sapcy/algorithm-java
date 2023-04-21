@@ -1,9 +1,7 @@
 package codingStudy.baekjoon;
 
 import java.io.*;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.StringTokenizer;
+import java.util.*;
 
 // https://www.acmicpc.net/problem/16236
 
@@ -11,13 +9,13 @@ public class 아기상어_16236 {
     static FastReader scan = new FastReader();
     static StringBuilder sb = new StringBuilder();
 
-    static int N, dist, sharkSize, sharkX, sharkY;
+    static int N, fishCount, sharkSize, time;
+    static Node sharkNode;
     static int[] dx = { 1, 0, -1, 0};
     static int[] dy = { 0, 1, 0, -1};
     static int[][] board;
     static boolean[][] visited;
     static Queue<Node> bfsQueue = new LinkedList<>();
-    static Queue<Node> targetNodes = new LinkedList<>();
 
     static void input() {
         N = scan.nextInt();
@@ -27,10 +25,12 @@ public class 아기상어_16236 {
 
         for (int i=0; i<N; i++) {
             for (int j=0; j<N; j++) {
-                board[i][j] = scan.nextInt();
-                if (board[i][j] == 9) {
-                    sharkX = i;
-                    sharkY = j;
+                int n = scan.nextInt();
+                if (n == 9) {
+                    sharkNode = new Node(i, j, 0);
+                    board[i][j] = 0;
+                } else if (n > 0){
+                    board[i][j] = n;
                 }
             }
         }
@@ -40,49 +40,55 @@ public class 아기상어_16236 {
     static void process() {
 
         while (true) {
-            boolean isMoved = false;
             visited = new boolean[N][N];
+            PriorityQueue<Node> fishes = new PriorityQueue<>();
 
-            search(sharkX, sharkY);
+            bfsQueue.add(sharkNode);
+            visited[sharkNode.x][sharkNode.y] = true;
 
+            while (!bfsQueue.isEmpty()) {
+                Node shark = bfsQueue.poll();
 
-            // 한번도 이동이 없었으면 끝
-            if (!isMoved) break;
+                for (int i=0; i<4; i++) {
+                    int nextX = shark.x + dx[i];
+                    int nextY = shark.y + dy[i];
+                    if (nextX < 0 || nextX >= N || nextY < 0 || nextY >= N) continue;
+                    if (visited[nextX][nextY]) continue;
 
-            count++;
-        }
+                    if (board[nextX][nextY] > 0 && board[nextX][nextY] < sharkSize) {
+                        Node fish = new Node(nextX, nextY, shark.dist + 1);
+                        fishes.add(fish);
+                        bfsQueue.add(fish);
+                        visited[nextX][nextY] = true;
+                    } else if (board[nextX][nextY] == sharkSize || board[nextX][nextY] == 0) {
+                        Node fish = new Node(nextX, nextY, shark.dist + 1);
+                        bfsQueue.add(fish);
+                        visited[nextX][nextY] = true;
+                    }
 
-        sb.append(count);
-    }
-
-    static int search(int x, int y) {
-        int dist = 0;
-        bfsQueue.add(new Node(x, y, 0));
-        visited[x][y] = true;
-
-        while (!bfsQueue.isEmpty()) {
-            Node target = bfsQueue.poll();
-
-            for (int i=0; i<4; i++) {
-                int nextX = target.x + dx[i];
-                int nextY = target.y + dy[i];
-                if (nextX < 0 || nextX >= N || nextY < 0 || nextY >= N) continue;
-                if (visited[nextX][nextY]) continue;
-
-                visited[nextX][nextY] = true;
-                bfsQueue.add(new Node(nextX, nextY, ))
+                }
 
             }
 
-        }
+            if (fishes.size() == 0) {
+                sb.append(time);
+                return;
+            }
 
-        // 아무 노드도 추가되지 않았으면 합칠 대상 없으므로 큐 비우기
-        if (targetNodes.size() == 1) {
-            targetNodes.poll();
-        }
+            Node eatTargetFish = fishes.poll();
+            time += eatTargetFish.dist;
+            fishCount++;
 
-        return sectionTotal;
+            if (fishCount == sharkSize) {
+                sharkSize++;
+                fishCount = 0;
+            }
+            sharkNode = new Node(eatTargetFish.x, eatTargetFish.y, 0);
+            board[eatTargetFish.x][eatTargetFish.y] = 0;
+
+        }
     }
+
 
     public static void main(String[] args) {
         input();
@@ -90,7 +96,7 @@ public class 아기상어_16236 {
         System.out.println(sb);
     }
 
-    public static class Node {
+    public static class Node implements Comparable<Node> {
         int x;
         int y;
         int dist;
@@ -99,6 +105,16 @@ public class 아기상어_16236 {
             this.x = x;
             this.y = y;
             this.dist = dist;
+        }
+
+        @Override
+        public int compareTo(Node n) {
+            if (this.dist == n.dist && this.x != n.x) {
+                return this.x - n.x;
+            } else if (this.dist == n.dist && this.x == n.x) {
+                return this.y - n.y;
+            }
+            return this.dist - n.dist;
         }
     }
 
