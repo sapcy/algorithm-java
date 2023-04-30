@@ -1,0 +1,153 @@
+package codingStudy.baekjoon;
+
+import java.io.*;
+import java.util.*;
+
+public class 연구소_14502 {
+    static FastReader scan = new FastReader();
+    static StringBuilder sb = new StringBuilder();
+
+    static int N, M, B, ans;
+    static int[][] A, blank;
+    static boolean[][] visited;
+    static int[][] dir = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
+
+    static void input() {
+        N = scan.nextInt();
+        M = scan.nextInt();
+        A = new int[N][M];
+        blank = new int[N * M+1][2];
+        visited = new boolean[N][M];
+        for (int i = 0; i < N; i++)
+            for (int j = 0; j < M; j++)
+                A[i][j] = scan.nextInt();
+    }
+
+    // 바이러스 퍼뜨리기!!
+    static void bfs() {
+        Queue<Integer> queue = new LinkedList<>();
+
+        // 모든 바이러스가 시작점으로 가능하니까, 전부 큐에 넣어준다.
+        for (int i=0; i<N; i++) {
+            for (int j=0; j<M; j++) {
+                visited[i][j] = false;
+                if (A[i][j] == 2) {
+                    queue.add(i);
+                    queue.add(j);
+                    visited[i][j] = true;
+                }
+            }
+        }
+
+        // BFS 과정
+        while (!queue.isEmpty()) {
+            int x = queue.poll();
+            int y = queue.poll();
+            for (int k=0; k<4; k++) {
+                int nx = x + dir[k][0];
+                int ny = y + dir[k][1];
+
+                if (nx < 0 || ny < 0 || nx >= N || ny >= M) continue;
+                if (A[nx][ny] != 0) continue;
+                if (visited[nx][ny]) continue;
+                visited[nx][ny] = true;
+                queue.add(nx);
+                queue.add(ny);
+            }
+        }
+
+        // 탐색이 종료된 시점이니, 안전 영역의 넓이를 계산하고, 정답을 갱신한다.
+        int cnt = 0;
+        for (int i=0; i<N; i++) {
+            for (int j=0; j<M; j++) {
+                if (A[i][j] == 0 && !visited[i][j]) {
+                    cnt++;
+                }
+            }
+        }
+        ans = Math.max(ans, cnt);
+    }
+
+    // idx 번째 빈 칸에 벽을 세울 지 말 지 결정해야 하고, 이 전까지 selected_cnt 개의 벽을 세웠다.
+    static void dfs(int idx, int selected_cnt) {
+        if (selected_cnt == 3) {  // 3 개의 벽을 모두 세운 상태bfs
+            bfs();
+            return;
+        }
+        if (idx > B) return;  // 더 이상 세울 수 있는 벽이 없는 상태
+
+        A[blank[idx][0]][blank[idx][1]] = 1;
+        dfs(idx+1, selected_cnt+1);
+        A[blank[idx][0]][blank[idx][1]] = 0;
+        dfs(idx+1, selected_cnt);
+    }
+
+    static void process() {
+        // 모든 벽의 위치를 먼저 모아놓자.
+        for (int i=0; i<N; i++) {
+            for (int j=0; j<M; j++) {
+                if (A[i][j] == 0) {
+                    B++;
+                    blank[B][0] = i;
+                    blank[B][1] = j;
+                }
+            }
+        }
+
+        // 벽을 3개 세우는 모든 방법을 확인해보자!
+        dfs(1, 0);
+        System.out.println(ans);
+    }
+
+    public static void main(String[] args) {
+        input();
+        process();
+    }
+
+
+    static class FastReader {
+        BufferedReader br;
+        StringTokenizer st;
+
+        public FastReader() {
+            br = new BufferedReader(new InputStreamReader(System.in));
+        }
+
+        public FastReader(String s) throws FileNotFoundException {
+            br = new BufferedReader(new FileReader(new File(s)));
+        }
+
+        String next() {
+            while (st == null || !st.hasMoreElements()) {
+                try {
+                    st = new StringTokenizer(br.readLine());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return st.nextToken();
+        }
+
+        int nextInt() {
+            return Integer.parseInt(next());
+        }
+
+        long nextLong() {
+            return Long.parseLong(next());
+        }
+
+        double nextDouble() {
+            return Double.parseDouble(next());
+        }
+
+        String nextLine() {
+            String str = "";
+            try {
+                str = br.readLine();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return str;
+        }
+    }
+}
