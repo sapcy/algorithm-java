@@ -36,25 +36,27 @@ public class Snake {
             if (changeTime < time && directionIndex < directionInfo.length) {
                 info = directionInfo[++directionIndex].split(" ");
                 changeTime = Integer.parseInt(info[0]);
+
             }
 
             // 전진
             snakeHead[0] += directions[Math.abs(direction)%4][0];
             snakeHead[1] += directions[Math.abs(direction)%4][1];
+            board[snakeHead[0]][snakeHead[1]] = true;
             snake.add(new int[]{snakeHead[0], snakeHead[1]});
 
             // 벽에 박았는지, 몸에 닿았는지 체크
             if (snakeHead[0] >= N || snakeHead[1] >= N) break;
             if (board[snakeHead[0]][snakeHead[1]]) break;
 
-
+            // 사과 있으면 먹기
             if (apple[snakeHead[0]][snakeHead[1]]) {
                 apple[snakeHead[0]][snakeHead[1]] = false;
-            } else {
+            }
+            else {
+                board[snake.get(0)[0]][snake.get(0)[1]] = false;
                 snake.remove(0);
             }
-
-            board[snakeHead[0]][snakeHead[1]] = true;
 
             // 방향 전환
             if (changeTime == time) {
